@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { protect } = require('../middleware/auth');
 
+
 const router = express.Router();
 
 // Add to cart
@@ -15,7 +16,7 @@ router.post('/add', protect, async (req, res) => {
   else user.cart.push({ product: productId, quantity });
   await user.save();
   const populated = await User.findById(req.user.id).populate('cart.product');
-  res.json(user.cart);
+  res.json({ success: true, cart: updatedCart });
 });
 
 // Get cart

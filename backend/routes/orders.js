@@ -1,0 +1,90 @@
+// backend/routes/orders.js
+const express = require('express');
+const router = express.Router();
+const Order = require('../models/Order');
+const User = require('../models/User');
+const { protect, isAdmin } = require('../middleware/auth'); // assuming you have auth middleware
+
+// Create new order (checkout)
+router.post('/', protect, async (req, res) => {
+  try {
+    const { items, totalAmount, shippingAddress } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ msg: 'Cart is empty' });
+    }
+
+    if (!shippingAddress) {
+      return res.status(400).json({ msg: 'Shipping address is required' });
+    }
+
+    // Optional: verify total matches backend calculation
+    // For simplicity, trusting frontend total here
+
+    const order = new Order({
+      user: req.user.id,
+      items,
+      totalAmount,
+      shippingAddress,
+    });
+
+    await order.save();
+
+    // Optional: clear user's cart after order
+    await User.findByIdAndUpdate(req.user.id, { $set: { cart: [] } });
+
+    res.status(201).json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+});
+
+// Optional: Get user's orders
+router.get('/', protect, async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user.id })
+      .populate('items.product', 'name price image')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Admin: Get ALL orders
+router.get('/all', protect, isAdmin, async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'username')
+      .populate('items.product', 'name price image')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Admin: Update order status
+router.put('/:id/status', protect, isAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(status)) {
+      return res.status(400).json({ msg: 'Invalid status' });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!order) return res.status(404).json({ msg: 'Order not found' });
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+module.exports = router;

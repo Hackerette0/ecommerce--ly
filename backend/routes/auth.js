@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -57,6 +58,16 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+router.get('/me', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password -cart');
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+    res.json(user);
+  } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }
 });

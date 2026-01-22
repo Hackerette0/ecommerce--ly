@@ -23,6 +23,9 @@ app.use('/uploads', express.static(path.join(__dirname, '..','uploads')));
 const chatRoutes = require('./routes/chat');
 app.use('/api/chat', chatRoutes);
 
+const orderRoutes = require('./routes/orders');
+app.use('/api/orders', orderRoutes);
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));

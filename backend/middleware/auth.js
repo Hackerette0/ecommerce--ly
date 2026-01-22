@@ -1,24 +1,38 @@
+// backend/middleware/auth.js
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const protect = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ msg: 'No token' });
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;    
-    next();
-  } catch (err) {
-    res.status(401).json({ msg: 'Invalid token' });
+const protect = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+      next();
+    } catch (error) {
+      res.status(401).json({ msg: 'Not authorized, token failed' });
+    }
+  } else {
+    res.status(401).json({ msg: 'Not authorized, no token' });
   }
 };
 
 const isSeller = (req, res, next) => {
-  console.log("DEBUG: User data from token ->", req.user); 
-  if (req.user && req.user.role === 'seller') {
+  if (req.user && (req.user.role === 'seller' || req.user.isAdmin)) {
     next();
   } else {
-    res.status(403).json({ msg: 'Access denied. Only sellers can perform this action.' });
+    res.status(403).json({ msg: 'Not authorized as seller' });
   }
 };
 
-module.exports = { protect, isSeller };
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(403).json({ msg: 'Not authorized as admin' });
+  }
+};
+
+module.exports = { protect, isSeller, isAdmin };

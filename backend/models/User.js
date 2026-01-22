@@ -1,3 +1,4 @@
+// backend/models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -17,7 +18,12 @@ const userSchema = new mongoose.Schema({
   role: { 
     type: String, 
     required: true, 
-    enum: ['buyer', 'seller']
+    enum: ['buyer', 'seller', 'admin'],   // ← added 'admin'
+    default: 'buyer'
+  },
+  isAdmin: { 
+    type: Boolean, 
+    default: false 
   },
   cart: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },

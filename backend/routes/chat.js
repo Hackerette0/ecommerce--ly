@@ -48,8 +48,9 @@ router.post('/', /* protect, */ async (req, res) => {
   });
 
   try {
+    const MODEL = "gemini-1.5-flash";
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       // Alternative fast model: gemini-3-flash-preview
       // Stronger vision: gemini-3-pro-preview (more expensive, may need billing enabled)
       {
