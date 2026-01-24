@@ -18,7 +18,7 @@ While standard e-commerce focuses on transactions, ōly focuses on **Validation 
 
 ### 1. The Shopping Experience
 An aesthetic, high-conversion interface featuring a curated selection of premium skincare.
-![Shop Landing]([https://your-github-link-to-screenshot-4.png](https://github.com/Hackerette0/ecommerce--ly/blob/main/docs/images/Screenshot%202026-01-24%20232716.png)) 
+![Shop Landing](https://github.com/Hackerette0/ecommerce--ly/blob/main/docs/images/Screenshot%202026-01-24%20232725.png) 
 *Screenshot Reference: Product Grid with 'Best for Oily Skin' filters.*
 
 ### 2. Conversational AI & Image Review
