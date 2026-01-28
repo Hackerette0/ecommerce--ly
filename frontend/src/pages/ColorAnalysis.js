@@ -119,7 +119,8 @@ export default function ColorAnalysis() {
           box-shadow: 0 12px 24px -6px rgba(219, 39, 119, 0.3);
         }
       `}</style>
-
+      
+      // ~ title screen
       {!showQuiz && (
         <div className="w-full max-w-2xl px-6 pt-12 pb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <h1 className="text-5xl md:text-6xl font-serif-aesthetic italic mb-4 text-slate-900 tracking-tight">
@@ -150,6 +151,7 @@ export default function ColorAnalysis() {
               </div>
             </div>
           ) : (
+            //~ After clicking start - The Color Analysis Quiz
             <div className="flex-1 flex flex-col h-full overflow-hidden animate-in fade-in duration-700 p-8">
               {analysisResult && (
                 <div className="mb-10 p-8 bg-slate-50 rounded-3xl border-l-8 border-pink-400">

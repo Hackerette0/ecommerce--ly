@@ -6,13 +6,17 @@ import { useNavigate } from 'react-router-dom';
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+
+  //ensures smooth loading without broken links - loading and errors
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [newProduct, setNewProduct] = useState({
     name: '', description: '', price: '', category: '', skinType: 'all', stock: '', image: ''
   });
   const navigate = useNavigate();
 
+  //
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -20,7 +24,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    const AdminDashboard = () => {
+  const AdminDashboard = () => {
   const [message, setMessage] = useState('Loading admin dashboard...');
   const navigate = useNavigate();
 

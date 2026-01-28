@@ -13,6 +13,9 @@ import ColorAnalysis from './pages/ColorAnalysis';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import CommunityForum from './pages/CommunityForum'; 
+import Navbar from './components/Navbar';
+import Wishlist from './pages/Wishlist';
+import Orders from './pages/Orders';
 
 // Protected route wrapper (simple version for now)
 const ProtectedRoute = ({ children }) => {
@@ -30,27 +33,29 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // For now: allow any logged-in user to access /admin
-  // Later: fetch user and check isAdmin / role === 'admin'
   return children;
 };
 
 function App() {
   return (
     <Router>
+      <Navbar/>
       <div className="App" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Header />
 
         <main style={{ padding: '20px', flex: 1 }}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/category/:categoryName" element={<Home />} />
             <Route path="/community" element={<CommunityForum />} />
             <Route path="/color-analysis" element={<ColorAnalysis />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/navbar" element={<Navbar />} />
             <Route path="/register" element={<Register />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/orders" element={<Orders />} />
 
             {/* Admin route – protected */}
             <Route
@@ -69,7 +74,7 @@ function App() {
               path="*"
               element={
                 <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-                  <h2>404 – Page Not Found</h2>
+                  <h2>Page not found ✨</h2>
                   <p>Try going back to <a href="/">Home</a></p>
                 </div>
               }

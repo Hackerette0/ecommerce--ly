@@ -18,6 +18,10 @@ export default {
           '100%': { opacity: '1', transform: 'scale(1)' },
         }
       },
+      fontFamily: {
+        'serif-aesthetic': ['"Playfair Display"', 'serif'],
+        'sans-aesthetic': ['"Plus Jakarta Sans"', 'sans-serif'],
+      },
       animation: {
         'fade-in': 'fade-in 0.7s ease-out forwards',
         'zoom-in': 'zoom-in 0.5s ease-out forwards',

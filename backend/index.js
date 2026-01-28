@@ -8,8 +8,13 @@ dotenv.config();
 
 const app = express();
 
-// 1. CORS should be one of the first things defined
-app.use(cors());
+// 1. CORS 
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // 2. IMPORTANT: Define the LARGE limits FIRST. 
 // Remove the old app.use(express.json()) lines.
@@ -18,7 +23,6 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ... rest of your routes ...
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');

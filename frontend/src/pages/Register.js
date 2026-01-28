@@ -18,10 +18,10 @@ function Register() {
         username,
         password,
       });
-
       alert('Registration successful! Please login.');
       navigate('/login');
-    } catch (err) {
+    } 
+    catch (err) {
       const msg = err.response?.data?.msg || 'Registration failed. Please try again.';
       setError(msg);
       console.error('Register error:', err.response?.data);
@@ -45,7 +45,8 @@ function Register() {
         maxWidth: '400px',
         width: '100%',
       }}>
-        <h2 style={{ color: '#F11A00', textAlign: 'center', marginBottom: '30px' }}>
+        <h2 style={{ color: '#F11A00', textAlign: 'center', 
+          marginBottom: '30px' }}>
           Register to ōly
         </h2>
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Camera, Send, Mic } from 'lucide-react';
+//import { Camera, Send, Mic } from 'lucide-react';
 
 export default function AIChatbot() {
   const [messages, setMessages] = useState([

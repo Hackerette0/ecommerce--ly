@@ -1,7 +1,8 @@
+// Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import api from '../libs/axios.js'; 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,25 +14,18 @@ function Login() {
     setError('');
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, {
-        username,
-        password,
-      });
+      const res = await api.post('/auth/login', { username, password });      
 
-      // Save token
-      localStorage.setItem('token', res.data.token);
-
-      // Optional: save basic user info if your backend sends it
-      // localStorage.setItem('user', JSON.stringify(res.data.user));
-
-      navigate('/');
+      if (res.data.token) {
+            localStorage.setItem('token', res.data.token);
+            navigate('/profile'); 
+        }
     } catch (err) {
-      const errorMsg = err.response?.data?.msg 
-        || 'Login failed. Please check your username and password.';
+      console.error("Login Error:", err);
+      const errorMsg = err.response?.data?.message || 'Login failed. Check credentials.';
       setError(errorMsg);
     }
   };
-
   return (
     <div style={{
       minHeight: '80vh',
