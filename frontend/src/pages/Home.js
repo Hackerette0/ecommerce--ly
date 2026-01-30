@@ -93,7 +93,7 @@ function Home() {
       {!categoryName && (
         <div className="hero-carousel" style={{ marginBottom: '60px' }}>
           <Slider {...settings}>
-            {allProducts.slice(0, 3).map((product) => (
+            {allProducts.slice(0, 5).map((product) => (
               <Link key={product._id} to={`/product/${product._id}`}>
                 <div className="relative group overflow-hidden">
                   <img 

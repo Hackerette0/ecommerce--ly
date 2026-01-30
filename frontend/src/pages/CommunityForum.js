@@ -7,7 +7,8 @@ const HARMFUL_TERMS = ['bleach', 'acid', 'burn', 'homemade', 'steroid'];
 
 export default function CommunityForum() {
   const [posts, setPosts] = useState([
-    { id: 1, author: "Anya", content: "Switching to gel cleansers changed my life in this humidity!", skinType: "Oily", status: "Safe" }
+    { id: 1, author: "Anya", content: "Switching to gel cleansers changed my life in this humidity!", 
+      skinType: "Oily", status: "Safe" }
   ]);
   const [newPost, setNewPost] = useState("");
   const [warning, setWarning] = useState("");
@@ -16,8 +17,6 @@ export default function CommunityForum() {
     e.preventDefault();
     setWarning("");
 
-    // --- AI MODERATION LOGIC (compromise.js) ---
-    // We normalize the text to catch variations
     let doc = nlp(newPost.toLowerCase());
     let foundHarmful = HARMFUL_TERMS.some(term => doc.has(term));
 
@@ -26,7 +25,6 @@ export default function CommunityForum() {
       return;
     }
 
-    // If safe, add to local state (In production, this sends to Backend)
     const postObj = {
       id: posts.length + 1,
       author: "You",

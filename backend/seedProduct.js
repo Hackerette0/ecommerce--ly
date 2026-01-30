@@ -4,7 +4,7 @@ require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
-    await Product.deleteMany({}); // clear existing (careful!)
+    await Product.deleteMany({}); 
 
     await Product.insertMany([
       {

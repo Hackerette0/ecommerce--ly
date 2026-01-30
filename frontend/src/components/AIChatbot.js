@@ -254,7 +254,7 @@ export default function AIChatbot() {
           >
             📸
           </button>
-          <button
+          {/*<button
             onClick={() => alert('Voice input coming soon! 🎤')} // Placeholder for mic
             style={{
               padding: '14px',
@@ -267,7 +267,7 @@ export default function AIChatbot() {
             }}
           >
             🎤
-          </button>
+          </button>*/}
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() && !selectedImage}

@@ -1,13 +1,12 @@
 //backend/routes/productRoutes.js
 const express = require('express');
 const path = require('path');
-
 const Product = require('../models/Product');
 const { protect, isSeller } = require('../middleware/auth');
-
-const router = express.Router();
 const multer = require('multer');
 const uploadDir = path.join(__dirname, '..', 'uploads');
+
+const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -21,12 +20,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-
-// 1. PUBLIC ACCESS: Both Buyers and Sellers can see all products
+//PUBLIC
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find()
-    .select('name price category skinType image description stock') // optional: explicitly select only needed fields
+    .select('name price category skinType image description stock') 
     .sort({ createdAt: -1 });
     console.log('Backend found products:', products.length);
     console.log('Products fetched:', products.length);
@@ -37,13 +35,12 @@ router.get('/', async (req, res) => {
   }
 });
 
+//PUBLIC
 router.get('/:id', async (req, res) => { const product = await Product.findById(req.params.id); res.json(product); });
 
-// 2. PROTECTED ACCESS: Only the Seller/Admin can add products
-// We re-enable 'admin' middleware here to distinguish the Seller from a Buyer
+//PROTECTED
 router.post('/', protect, isSeller, async (req, res) => {
   try {
-    // If it's an array → bulk insert
     if (Array.isArray(req.body)) {
       const productsData = req.body.map(item => ({
         name: item.name?.trim(),
@@ -52,7 +49,7 @@ router.post('/', protect, isSeller, async (req, res) => {
         category: item.category?.toLowerCase(),
         skinType: item.skinType?.toLowerCase() || 'all',
         stock: Number(item.stock) || 0,
-        image: item.image || '',  // accept URL for now
+        image: item.image || '', 
       }));
 
       const validProducts = productsData.filter(p => p.name && !isNaN(p.price) && p.category);

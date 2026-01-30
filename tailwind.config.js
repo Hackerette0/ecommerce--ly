@@ -4,10 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        'primary': '#e11d48',   // rose-600
+        'primary': '#e11d48',   
         'primary-light': '#fb7185',
       },
-      // Adding these animations makes the "Aesthetic" transitions work
       keyframes: {
         'fade-in': {
           '0%': { opacity: '0', transform: 'translateY(10px)' },

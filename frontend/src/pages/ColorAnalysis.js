@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react';
-import ColorAnalysisQuiz from '../components/ColorAnalysisQuiz';
-import { Camera, Send, X, Upload, Loader2, Sparkles } from 'lucide-react';
+import ColorAnalysisQuiz from '../components/ColorAnalysisQuiz';      // adjust path
+import ColorAnalysisResult from '../components/ColorAnalysisResult'; // adjust path
+import { Camera, X, Loader2, Sparkles } from 'lucide-react';
 import axios from 'axios';
 
 export default function ColorAnalysis() {
   const [showQuiz, setShowQuiz] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState(null);
+  const [showResult, setShowResult] = useState(false);
+  const [quizResult, setQuizResult] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null); // from photo
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
@@ -23,6 +25,8 @@ export default function ColorAnalysis() {
     setImagePreview(null);
     setError(null);
   };
+
+  const [showModal, setShowModal] = useState(false);
 
   const closeModal = () => {
     if (videoStream) {
@@ -49,7 +53,6 @@ export default function ColorAnalysis() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    // Lower quality to 0.6 to prevent "Payload Too Large" errors
     setImagePreview(canvas.toDataURL('image/jpeg', 0.6));
     if (videoStream) videoStream.getTracks().forEach(track => track.stop());
     setMode('preview');
@@ -70,145 +73,155 @@ export default function ColorAnalysis() {
     if (!imagePreview) return;
     setLoading(true);
     setError(null);
-    
+
     try {
-      // Clean base64 and verify API URL
       const base64Data = imagePreview.split(',')[1];
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Fallback for local testing
-      
-      const response = await axios.post(`${apiUrl}/api/color-analysis`,
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await axios.post(`${apiUrl}/api/color-analysis`, 
         { image: base64Data },
-        { 
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 30000 // Give it 30 seconds to process
-        }
+        { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
       );
 
       if (response.data?.analysis) {
         setAnalysisResult(response.data.analysis);
-        setShowModal(false);
-        setShowQuiz(true);
       }
     } catch (err) {
-      console.error("Full Error Object:", err);
-      if (err.response?.status === 413) {
-        setError('Image is too large for the server.');
-      } else if (err.code === 'ECONNABORTED') {
-        setError('Analysis took too long. Try a smaller photo.');
-      } else {
-        setError('Connection failed. Is the backend server running?');
-      }
+      console.error(err);
+      setError('Photo analysis failed. Try again or skip to quiz.');
     } finally {
       setLoading(false);
+      closeModal();
+      setShowQuiz(true);
     }
   };
 
+  const handleQuizComplete = (result) => {
+    setQuizResult(result);
+    setShowResult(true);
+  };
+
+  const resetAll = () => {
+    setShowQuiz(false);
+    setShowResult(false);
+    setQuizResult(null);
+    setAnalysisResult(null);
+    setImagePreview(null);
+  };
+
   return (
-    <div className="min-h-screen bg-[#fdfcfb] text-slate-800 flex flex-col items-center justify-center overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-[#fdfcfb] text-slate-800 flex flex-col items-center justify-center font-sans">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;600&display=swap');
-        .font-serif-aesthetic { font-family: 'Playfair Display', serif; }
-        .font-sans-aesthetic { font-family: 'Inter', sans-serif; }
-        .btn-radial-gradient {
-          background: radial-gradient(circle at center, #ec4899 0%, #be185d 100%);
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .btn-radial-gradient:hover {
-          background: radial-gradient(circle at center, #f472b6 0%, #db2777 100%);
-          transform: translateY(-2px);
-          box-shadow: 0 12px 24px -6px rgba(219, 39, 119, 0.3);
-        }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .btn-radial { background: radial-gradient(circle at center, #ec4899 0%, #be185d 100%); }
+        .btn-radial:hover { background: radial-gradient(circle at center, #f472b6 0%, #db2777 100%); }
       `}</style>
-      
-      // ~ title screen
-      {!showQuiz && (
-        <div className="w-full max-w-2xl px-6 pt-12 pb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <h1 className="text-5xl md:text-6xl font-serif-aesthetic italic mb-4 text-slate-900 tracking-tight">
+
+      {!showQuiz && !showResult && (
+        <div className="w-full max-w-2xl px-6 pt-12 pb-8 text-center">
+          <h1 className="text-5xl md:text-6xl font-serif italic mb-4 text-slate-900">
             Personal Color Harmony
           </h1>
-          <p className="text-slate-400 font-sans-aesthetic uppercase tracking-[0.25em] text-[10px] mb-12">
-            The Science of Your Natural Glow
+          <p className="text-slate-400 uppercase tracking-widest text-xs mb-12">
+            Discover Your Perfect Palette
           </p>
         </div>
       )}
 
-      <main className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl px-4">
-        <div className={`w-full bg-white transition-all duration-700 ease-in-out ${showQuiz ? 'h-[80vh] rounded-[2.5rem] shadow-2xl border border-pink-50' : 'max-w-md shadow-lg rounded-[2.5rem]'}`}>
+      <main className="flex-1 flex flex-col items-center w-full max-w-4xl px-4">
+        <div className={`w-full bg-white transition-all duration-700 ${showQuiz || showResult ? 'rounded-3xl shadow-2xl border border-pink-50' : 'max-w-md shadow-xl rounded-[3rem]'}`}>
           
-          {!showQuiz ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-10">
-              <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center ring-8 ring-pink-50/50">
-                <Sparkles className="text-pink-400 w-10 h-10 animate-pulse" />
+          {!showQuiz && !showResult ? (
+            <div className="p-12 text-center space-y-10">
+              <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-pink-50/50">
+                <Sparkles className="text-pink-500 w-12 h-12 animate-pulse" />
               </div>
-              <div className="space-y-4">
-                <h2 className="text-2xl font-serif-aesthetic text-slate-800">Welcome to your palette.</h2>
+              <div className="space-y-6">
+                <h2 className="text-3xl font-serif text-slate-800">Find Your Season</h2>
                 <button
                   onClick={() => setShowQuiz(true)}
-                  className="btn-radial-gradient w-full text-white py-5 rounded-full font-sans-aesthetic font-semibold tracking-widest text-xs shadow-xl"
+                  className="btn-radial w-full text-white py-5 rounded-full font-semibold tracking-wider shadow-xl"
                 >
-                  START THE JOURNEY
+                  START ANALYSIS
                 </button>
               </div>
             </div>
+          ) : showResult ? (
+            <div className="p-8">
+              <ColorAnalysisResult result={quizResult} onReset={resetAll} />
+            </div>
           ) : (
-            //~ After clicking start - The Color Analysis Quiz
-            <div className="flex-1 flex flex-col h-full overflow-hidden animate-in fade-in duration-700 p-8">
+            <div className="flex flex-col h-[80vh] overflow-hidden p-6 md:p-10">
               {analysisResult && (
-                <div className="mb-10 p-8 bg-slate-50 rounded-3xl border-l-8 border-pink-400">
-                  <p className="text-slate-700 font-serif-aesthetic italic text-xl">"{analysisResult}"</p>
+                <div className="mb-8 p-6 bg-pink-50/60 rounded-2xl border-l-4 border-pink-400">
+                  <p className="text-slate-700 italic">AI Insight: {analysisResult}</p>
                 </div>
               )}
-              <ColorAnalysisQuiz />
+              <ColorAnalysisQuiz onComplete={handleQuizComplete} />
             </div>
           )}
         </div>
       </main>
 
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-sm">
-        <div className="bg-white/80 backdrop-blur-2xl border border-white/40 shadow-xl rounded-full p-2 flex items-center">
-          <button onClick={openModal} className="p-4 btn-radial-gradient text-white rounded-full">
-            <Camera size={20} />
-          </button>
-          <div className="flex-1 px-5 font-sans-aesthetic text-[10px] tracking-widest text-slate-400 uppercase">Analysis Menu</div>
+      {/*{!showResult && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-20">
+          <div className="bg-white/90 backdrop-blur-xl border border-white/50 shadow-2xl rounded-full p-3 flex items-center">
+            <button onClick={openModal} className="p-4 btn-radial text-white rounded-full">
+              <Camera size={22} />
+            </button>
+            <div className="flex-1 text-center text-xs tracking-widest text-slate-500 uppercase font-medium">
+              Optional Photo Analysis
+            </div>
+          </div>
         </div>
-      </div>
+      )}*/}
 
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-6">
-          <div className="bg-white rounded-[3rem] p-10 max-w-sm w-full relative">
-            <button onClick={closeModal} className="absolute top-10 right-10 text-slate-300 hover:text-slate-800">
-              <X size={20} />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 md:p-10 max-w-md w-full relative">
+            <button onClick={closeModal} className="absolute top-5 right-5 text-slate-400 hover:text-slate-800">
+              <X size={24} />
             </button>
-            <h3 className="text-2xl font-serif-aesthetic text-slate-900 text-center mb-10">Capture Essence</h3>
-            
-            {error && <div className="mb-6 p-4 bg-red-50 text-red-500 rounded-2xl text-[10px] font-bold text-center">{error}</div>}
-            
+            <h3 className="text-2xl font-serif text-center mb-8">Capture Your Essence</h3>
+
+            {error && <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-2xl text-center text-sm">{error}</div>}
+
             {mode === 'choose' && (
               <div className="space-y-4">
-                <button onClick={startCamera} className="w-full py-5 border border-slate-100 rounded-2xl font-sans-aesthetic text-[10px] font-bold tracking-widest hover:bg-slate-50 transition-all">TAKE PHOTO</button>
-                <button onClick={() => fileInputRef.current?.click()} className="w-full py-5 border border-slate-100 rounded-2xl font-sans-aesthetic text-[10px] font-bold tracking-widest hover:bg-slate-50 transition-all">UPLOAD GALLERY</button>
+                <button onClick={startCamera} className="w-full py-5 border border-slate-200 rounded-2xl hover:bg-slate-50 font-medium">Take Photo</button>
+                <button onClick={() => fileInputRef.current?.click()} className="w-full py-5 border border-slate-200 rounded-2xl hover:bg-slate-50 font-medium">Upload from Gallery</button>
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
               </div>
             )}
 
             {mode === 'camera' && (
-              <div className="space-y-6 text-center">
-                <div className="rounded-[2rem] overflow-hidden aspect-square bg-slate-100"><video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" /></div>
-                <button onClick={capturePhoto} className="btn-radial-gradient w-full text-white py-5 rounded-2xl font-sans-aesthetic font-bold text-[10px] tracking-widest">SNAP</button>
+              <div className="space-y-6">
+                <div className="rounded-2xl overflow-hidden aspect-square bg-slate-100 border">
+                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                </div>
+                <button onClick={capturePhoto} className="btn-radial w-full text-white py-5 rounded-2xl font-semibold">SNAP</button>
               </div>
             )}
 
             {mode === 'preview' && (
               <div className="space-y-6">
-                <div className="rounded-[2rem] overflow-hidden aspect-square"><img src={imagePreview} alt="Preview" className="w-full h-full object-cover" /></div>
-                <button onClick={analyzeImage} disabled={loading} className="btn-radial-gradient w-full text-white py-5 rounded-2xl font-sans-aesthetic font-bold text-[10px] tracking-widest flex items-center justify-center gap-2">
-                  {loading ? <Loader2 className="animate-spin" size={16} /> : "BEGIN ANALYSIS"}
+                <div className="rounded-2xl overflow-hidden aspect-square border">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <button 
+                  onClick={analyzeImage} 
+                  disabled={loading}
+                  className="btn-radial w-full text-white py-5 rounded-2xl font-semibold flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : "ANALYZE PHOTO"}
                 </button>
               </div>
             )}
           </div>
         </div>
       )}
+
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );

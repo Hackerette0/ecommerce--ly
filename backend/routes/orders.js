@@ -3,9 +3,9 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const User = require('../models/User');
-const { protect, isAdmin } = require('../middleware/auth'); // assuming you have auth middleware
+const { protect, isAdmin } = require('../middleware/auth'); 
 
-// Create new order (checkout)
+
 router.post('/', protect, async (req, res) => {
   try {
     const { items, totalAmount, shippingAddress } = req.body;
@@ -18,9 +18,6 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ msg: 'Shipping address is required' });
     }
 
-    // Optional: verify total matches backend calculation
-    // For simplicity, trusting frontend total here
-
     const order = new Order({
       user: req.user.id,
       items,
@@ -30,7 +27,6 @@ router.post('/', protect, async (req, res) => {
 
     await order.save();
 
-    // Optional: clear user's cart after order
     await User.findByIdAndUpdate(req.user.id, { $set: { cart: [] } });
 
     res.status(201).json(order);
@@ -40,7 +36,6 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// Optional: Get user's orders
 router.get('/', protect, async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id })
@@ -52,7 +47,6 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// Admin: Get ALL orders
 router.get('/all', protect, isAdmin, async (req, res) => {
   try {
     const orders = await Order.find()
@@ -65,7 +59,6 @@ router.get('/all', protect, isAdmin, async (req, res) => {
   }
 });
 
-// Admin: Update order status
 router.put('/:id/status', protect, isAdmin, async (req, res) => {
   try {
     const { status } = req.body;

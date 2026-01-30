@@ -16,8 +16,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// 2. IMPORTANT: Define the LARGE limits FIRST. 
-// Remove the old app.use(express.json()) lines.
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
