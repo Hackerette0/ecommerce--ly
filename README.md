@@ -1,4 +1,4 @@
-# ōly — AI-Powered Personal Beauty & Skincare Ecosystem
+# Òly — AI-Powered Personal Beauty & Skincare Ecosystem
 
 ōly is a luxury MERN-stack e-commerce platform that bridges the gap between traditional retail and personalized skincare through generative AI. Built as a proof-of-concept for a venture-building environment, it leverages the **Google Gemini 1.5 Flash** model to provide real-time skin analysis and color harmony consultation.
 
